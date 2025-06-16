@@ -30,22 +30,22 @@ goto :eof
 call :findinterface
 
 echo.
-echo [TEST] Tespit edilen aktif ag arayuzu / Detected active network interface: '!activeInterface!'
+echo [TEST] Tespit edilen aktif ağ arayüzü / Detected active network interface: '!activeInterface!'
 
 if "!activeInterface!"=="" (
-    echo HATA / ERROR: Aktif baglanti bulunamadi! / No active connection found!
+    echo HATA / ERROR: Aktif bağlantı bulunamadı! / No active connection found!
     pause
     goto menu
 )
 
-echo Cloudflare DNS ayarlaniyor / Setting Cloudflare DNS...
+echo Cloudflare DNS ayarlanıyor / Setting Cloudflare DNS...
 netsh interface ip set dns name="!activeInterface!" static 1.1.1.1
 netsh interface ip add dns name="!activeInterface!" 1.0.0.1 index=2
 
 if errorlevel 1 (
-    echo ❌ HATA / ERROR: DNS ayarlanamadi. Muhtemelen arayuz adi gecersiz.
+    echo ❌ HATA / ERROR: DNS ayarlanamadı. Arayüz adı geçersiz olabilir.
 ) else (
-    echo ✅ Tamamlandi / Done.
+    echo ✅ Tamamlandı / Done.
 )
 
 pause
@@ -55,21 +55,21 @@ goto menu
 call :findinterface
 
 echo.
-echo [TEST] Tespit edilen aktif ag arayuzu / Detected active network interface: '!activeInterface!'
+echo [TEST] Tespit edilen aktif ağ arayüzü / Detected active network interface: '!activeInterface!'
 
 if "!activeInterface!"=="" (
-    echo HATA / ERROR: Aktif baglanti bulunamadi! / No active connection found!
+    echo HATA / ERROR: Aktif bağlantı bulunamadı! / No active connection found!
     pause
     goto menu
 )
 
-echo DNS ayarlari varsayilana donuluyor / Resetting DNS to automatic...
+echo DNS ayarları varsayılan olarak sıfırlanıyor / Resetting DNS to automatic...
 netsh interface ip set dns name="!activeInterface!" dhcp
 
 if errorlevel 1 (
-    echo ❌ HATA / ERROR: DNS sifirlanamadi.
+    echo ❌ HATA / ERROR: DNS sıfırlanamadı.
 ) else (
-    echo ✅ Tamamlandi / Done.
+    echo ✅ Tamamlandı / Done.
 )
 
 pause
