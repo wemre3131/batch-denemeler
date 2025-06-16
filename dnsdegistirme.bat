@@ -18,12 +18,11 @@ if "%choice%"=="2" goto cleardns
 if "%choice%"=="3" exit
 goto menu
 
+:: Improved interface detection function
 :findinterface
 set "activeInterface="
-for /f "tokens=2 delims==" %%a in ('wmic nic where "NetEnabled='true'" get NetConnectionID /value ^| findstr "NetConnectionID"') do (
-    set "activeInterface=%%a"
-    set "activeInterface=!activeInterface:~0,-1!"  // Remove trailing CR character
-    goto :eof
+for /f "tokens=2 delims=:" %%a in ('netsh interface show interface ^| findstr "Connected"') do (
+    for /f "tokens=*" %%b in ("%%a") do set "activeInterface=%%b"
 )
 goto :eof
 
@@ -31,14 +30,14 @@ goto :eof
 call :findinterface
 
 echo.
-echo [TEST] Tespit edilen aktif ağ arayüzü / Detected active network interface: '!activeInterface!'
-
 if "!activeInterface!"=="" (
+    echo [TEST] Aktif ağ arayüzü bulunamadı / No active interface detected
     echo HATA / ERROR: Aktif bağlantı bulunamadı! / No active connection found!
     pause
     goto menu
 )
 
+echo [TEST] Tespit edilen aktif ağ arayüzü / Detected active network interface: '!activeInterface!'
 echo Cloudflare DNS ayarlanıyor / Setting Cloudflare DNS...
 netsh interface ip set dns name="!activeInterface!" static 1.1.1.1
 if errorlevel 1 goto dnsError
@@ -50,8 +49,8 @@ pause
 goto menu
 
 :dnsError
-echo ❌ HATA / ERROR: DNS ayarlanamadı. Arayüz adı geçersiz olabilir.
-echo Arayüz adı: '!activeInterface!'
+echo ❌ HATA / ERROR: DNS ayarlanamadı / Failed to set DNS
+echo Arayüz adı / Interface name: '!activeInterface!'
 pause
 goto menu
 
@@ -59,22 +58,20 @@ goto menu
 call :findinterface
 
 echo.
-echo [TEST] Tespit edilen aktif ağ arayüzü / Detected active network interface: '!activeInterface!'
-
 if "!activeInterface!"=="" (
+    echo [TEST] Aktif ağ arayüzü bulunamadı / No active interface detected
     echo HATA / ERROR: Aktif bağlantı bulunamadı! / No active connection found!
     pause
     goto menu
 )
 
+echo [TEST] Tespit edilen aktif ağ arayüzü / Detected active network interface: '!activeInterface!'
 echo DNS ayarları varsayılan olarak sıfırlanıyor / Resetting DNS to automatic...
 netsh interface ip set dns name="!activeInterface!" dhcp
 if errorlevel 1 (
-    echo ❌ HATA / ERROR: DNS sıfırlanamadı.
-    echo Arayüz adı: '!activeInterface!'
+    echo ❌ HATA / ERROR: DNS sıfırlanamadı / Failed to reset DNS
 ) else (
     echo ✅ Tamamlandı / Done.
 )
-
 pause
 goto menu
