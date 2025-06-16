@@ -20,8 +20,9 @@ goto menu
 
 :findinterface
 set "activeInterface="
-for /f "skip=1 tokens=1,*" %%a in ('wmic nic where "NetEnabled=true and NetConnectionID is not null" get NetConnectionID ^| findstr /r /v "^$"') do (
-    set "activeInterface=%%b"
+for /f "tokens=2 delims==" %%a in ('wmic nic where "NetEnabled='true'" get NetConnectionID /value ^| findstr "NetConnectionID"') do (
+    set "activeInterface=%%a"
+    set "activeInterface=!activeInterface:~0,-1!"  // Remove trailing CR character
     goto :eof
 )
 goto :eof
@@ -40,14 +41,17 @@ if "!activeInterface!"=="" (
 
 echo Cloudflare DNS ayarlanıyor / Setting Cloudflare DNS...
 netsh interface ip set dns name="!activeInterface!" static 1.1.1.1
+if errorlevel 1 goto dnsError
 netsh interface ip add dns name="!activeInterface!" 1.0.0.1 index=2
+if errorlevel 1 goto dnsError
 
-if errorlevel 1 (
-    echo ❌ HATA / ERROR: DNS ayarlanamadı. Arayüz adı geçersiz olabilir.
-) else (
-    echo ✅ Tamamlandı / Done.
-)
+echo ✅ Tamamlandı / Done.
+pause
+goto menu
 
+:dnsError
+echo ❌ HATA / ERROR: DNS ayarlanamadı. Arayüz adı geçersiz olabilir.
+echo Arayüz adı: '!activeInterface!'
 pause
 goto menu
 
@@ -65,9 +69,9 @@ if "!activeInterface!"=="" (
 
 echo DNS ayarları varsayılan olarak sıfırlanıyor / Resetting DNS to automatic...
 netsh interface ip set dns name="!activeInterface!" dhcp
-
 if errorlevel 1 (
     echo ❌ HATA / ERROR: DNS sıfırlanamadı.
+    echo Arayüz adı: '!activeInterface!'
 ) else (
     echo ✅ Tamamlandı / Done.
 )
