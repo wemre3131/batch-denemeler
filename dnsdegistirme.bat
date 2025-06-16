@@ -18,13 +18,12 @@ if "%choice%"=="2" goto cleardns
 if "%choice%"=="3" exit
 goto menu
 
-:: ----- Aktif arayüzü bulma fonksiyonu -----
 :findinterface
 set "activeInterface="
-for /f "tokens=1,*" %%a in ('netsh interface show interface ^| findstr /C:"Bağlandı" /C:"Connected"') do (
-    set activeInterface=%%b
+for /f "skip=1 tokens=1,*" %%a in ('wmic nic where "NetEnabled=true and NetConnectionID is not null" get NetConnectionID ^| findstr /r /v "^$"') do (
+    set "activeInterface=%%b"
+    goto :eof
 )
-set "activeInterface=!activeInterface:~1!"
 goto :eof
 
 :setdns
