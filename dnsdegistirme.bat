@@ -1,11 +1,11 @@
 @echo off
 setlocal enabledelayedexpansion
-title DNS Configuration Menu - DNS Setup Menu
+title DNS Configuration Menu
 
 :menu
 cls
 echo ================================
-echo        DNS MENU (TR/EN)
+echo        DNS Configuration Menu
 echo ================================
 echo (1) Set Cloudflare DNS (1.1.1.1)
 echo (2) Reset to automatic (DHCP)
@@ -18,31 +18,11 @@ if "%choice%"=="2" goto cleardns
 if "%choice%"=="3" exit
 goto menu
 
-:findinterface
-set "activeInterface="
-for /f "tokens=3*" %%a in ('netsh interface show interface ^| findstr "Connected"') do (
-    set "activeInterface=%%a %%b"
-    set "activeInterface=!activeInterface:~0,-1!"
-    goto :eof
-)
-goto :eof
-
 :setdns
-call :findinterface
-
-echo.
-if "!activeInterface!"=="" (
-    echo [ERROR] No active network interface detected
-    pause
-    goto menu
-)
-
-echo [INFO] Active network interface: "!activeInterface!"
-echo Setting Cloudflare DNS...
-
-netsh interface ipv4 set dns name="!activeInterface!" static 1.1.1.1 primary validate=no
+echo Setting Cloudflare DNS for Ethernet interface...
+netsh interface ipv4 set dns name="Ethernet" static 1.1.1.1 primary
 if errorlevel 1 goto dnsError
-netsh interface ipv4 add dns name="!activeInterface!" 1.0.0.1 index=2 validate=no
+netsh interface ipv4 add dns name="Ethernet" 1.0.0.1 index=2
 if errorlevel 1 goto dnsError
 
 echo ✅ DNS settings updated successfully
@@ -51,30 +31,15 @@ goto menu
 
 :dnsError
 echo ❌ ERROR: Failed to set DNS
-echo Interface name: "!activeInterface!"
-echo.
-echo TROUBLESHOOTING:
-echo 1. Run script as Administrator
-echo 2. Verify your interface name
-echo 3. Try manual setup with:
-echo    netsh interface ipv4 set dns name="Interface_Name" static 1.1.1.1
+echo Please try these steps:
+echo 1. Right-click and Run as Administrator
+echo 2. Verify interface name is "Ethernet"
 pause
 goto menu
 
 :cleardns
-call :findinterface
-
-echo.
-if "!activeInterface!"=="" (
-    echo [ERROR] No active network interface detected
-    pause
-    goto menu
-)
-
-echo [INFO] Active network interface: "!activeInterface!"
-echo Resetting DNS to default...
-
-netsh interface ipv4 set dns name="!activeInterface!" dhcp
+echo Resetting DNS to DHCP...
+netsh interface ipv4 set dns name="Ethernet" dhcp
 if errorlevel 1 (
     echo ❌ ERROR: Failed to reset DNS
 ) else (
