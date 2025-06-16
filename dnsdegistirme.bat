@@ -19,37 +19,37 @@ if "%choice%"=="3" exit
 goto menu
 
 :setdns
-echo Setting Cloudflare DNS...
+echo Setting Cloudflare DNS for Ethernet...
 echo.
-netsh interface ipv4 set dns name="Dedicated Ethernet" static 1.1.1.1 primary validate=no
+netsh interface ipv4 set dns name="Ethernet" static 1.1.1.1 primary
 if errorlevel 1 goto dnsError
-netsh interface ipv4 add dns name="Dedicated Ethernet" 1.0.0.1 index=2 validate=no
+netsh interface ipv4 add dns name="Ethernet" 1.0.0.1 index=2
 if errorlevel 1 goto dnsError
 
-echo ✅ Success! DNS set to:
-echo     Primary: 1.1.1.1
-echo     Secondary: 1.0.0.1
+echo ✅ Successfully set DNS to:
+echo Primary:   1.1.1.1
+echo Secondary: 1.0.0.1
 pause
 goto menu
 
 :dnsError
-echo ❌ ERROR: Failed to set DNS
+echo ❌ ERROR: Failed to configure DNS
 echo.
-echo SOLUTION:
-echo 1. Right-click the script and select "Run as administrator"
-echo 2. Make sure your interface is named exactly "Dedicated Ethernet"
-echo 3. Check your connection is active
+echo TROUBLESHOOTING:
+echo 1. MUST run as Administrator (right-click -> Run as administrator)
+echo 2. Confirm interface name is "Ethernet" (no quotes)
+echo 3. Check network cable/WiFi is connected
 echo.
 pause
 goto menu
 
 :cleardns
-echo Resetting DNS to automatic (DHCP)...
-netsh interface ipv4 set dns name="Dedicated Ethernet" dhcp
+echo Resetting Ethernet to DHCP...
+netsh interface ipv4 set dns name="Ethernet" dhcp
 if errorlevel 1 (
     echo ❌ ERROR: Failed to reset DNS
 ) else (
-    echo ✅ Success! DNS reset to automatic
+    echo ✅ Successfully reset to automatic DNS
 )
 pause
 goto menu
